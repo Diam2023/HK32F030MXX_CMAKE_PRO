@@ -20,6 +20,9 @@ extern "C" {
 #include "hk32f030m.h"
 #include "hk32f030m_conf.h"
 
+#include "gpio.h"
+#include "usart.h"
+
 #ifdef __cplusplus
 }
 #endif

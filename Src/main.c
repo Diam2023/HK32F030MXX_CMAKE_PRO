@@ -24,8 +24,12 @@
 
 int main(void)
 {
+    init_gpio();
+    init_usart();
+    
     printf("HK32F030MF4P6 INIT");
     fflush(stdout);
+    
     /* Infinite loop */
     while (1)
     {
