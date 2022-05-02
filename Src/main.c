@@ -22,6 +22,15 @@
 
 #include <stdio.h>
 
+/* Private function prototypes -----------------------------------------------*/
+#ifdef __GNUC__
+/* With GCC/RAISONANCE, small printf (option LD Linker->Libraries->Small printf
+   set to 'Yes') calls __io_putchar() */
+#define PUTCHAR_PROTOTYPE int __io_putchar(int ch)
+#else
+#define PUTCHAR_PROTOTYPE int fputc(int ch, FILE *f)
+#endif /* __GNUC__ */
+
 int main(void)
 {
     init_gpio();
@@ -37,49 +46,22 @@ int main(void)
     }
 }
 
-#ifdef __GNUC__  // GNU编译器
-
 /**
- * @brief GNU编译期下的重定向printf函数
- * @param  fd               文件指针
- * @param  pBuffer          buffer
- * @param  size             字符串大小
- * @return int
+ * @brief  Retargets the C library printf function to the USART.
+ * @param  None
+ * @retval None
  */
-int _write(int fd, char *pBuffer, int size)
-{
-    // 如果printf函数最后不添加"\n"，信息不会打印出来，需要添加fflush(stdout);
-    while (size--)
-    {
-        while ((USART1->ISR & USART_ISR_TXE) == 0)
-            ;
-        USART1->TDR = *(uint8_t *)pBuffer++;
-    }
-    return size;
+PUTCHAR_PROTOTYPE {
+  /* Place your implementation of fputc here */
+  /* e.g. write a character to the USART */
+  USART_SendData(USART1, (uint8_t) ch);
+
+  /* Loop until the end of transmission */
+  while (USART_GetFlagStatus(USART1, USART_FLAG_TC) == RESET)
+  {}
+
+  return ch;
 }
-
-#endif  // __GNUC__
-
-#ifndef __GNUC__
-
-/**
- * @brief KEIL
- * @param  ch               desc
- * @param  f                desc
- * @return int
- */
-int fputc(int ch, FILE *f)
-{
-    while (USART_GetFlagStatus(USART1, USART_FLAG_TXE) == RESET)
-    {
-    }
-    while ((USART1->ISR & USART_ISR_TXE) == 0)
-        ;
-    USART1->TDR = (uint8_t)ch;
-    return (ch);
-}
-
-#endif  // !__GNUC__
 
 #ifdef USE_FULL_ASSERT
 
