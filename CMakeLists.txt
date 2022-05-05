@@ -23,8 +23,12 @@ target_include_directories(${CMAKE_PROJECT_NAME}.elf PRIVATE
   CMSIS/HK32F030M/Include
   HK32F030M_Lib/inc)
 
+  if (${CMAKE_BUILD_TYPE} STREQUAL "Debug")
+	message("Debug mode")
+  target_compile_definitions(${CMAKE_PROJECT_NAME}.elf PRIVATE USE_FULL_ASSERT)
+endif()
+
 target_compile_definitions(${CMAKE_PROJECT_NAME}.elf PRIVATE
-  # USE_FULL_ASSERT
   HK32F030MF4P6)
 
 set(MCU_FLAGS -mcpu=cortex-m0 -mthumb)
